@@ -1,0 +1,30 @@
+---
+
+- name: Enable rebuilderd copr
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: enabled
+    name: jelly/rebuilderd
+
+- name: Install rebuilderd
+  ansible.builtin.dnf:
+    name: rebuilderd
+    state: latest
+
+- name: Configure rebuilderd.conf
+  template: src=rebuilderd.conf.j2 dest=/etc/rebuilderd.conf owner=rebuilderd group=rebuilderd mode=0640
+
+- name: Configure rebuilderd-sync.conf
+  template: src=rebuilderd-sync.conf.j2 dest=/etc/rebuilderd-sync.conf owner=rebuilderd group=rebuilderd mode=0664
+
+- name: Enable and run rebuilderd.service
+  ansible.builtin.systemd_service:
+    name: rebuilderd.service
+    state: started
+    enabled: true
+
+- name: Enable and run rebuilderd-sync@fedora-rawhide.timer
+  ansible.builtin.systemd_service:
+    name: rebuilderd-sync@fedora-rawhide.timer
+    state: started
+    enabled: true
