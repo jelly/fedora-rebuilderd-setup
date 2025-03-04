@@ -1,0 +1,37 @@
+---
+
+- name: Enable rebuilderd copr
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: enabled
+    name: jelly/rebuilderd
+
+- name: Install rebuilderd-worker
+  ansible.builtin.dnf:
+    name: rebuilderd-worker
+    state: latest
+
+- name: Configure rebuilderd-worker.conf
+  template: src=rebuilderd-worker.conf.j2 dest=/etc/rebuilderd-worker.conf owner=root group=root mode=0600
+
+- name: Create /usr/libexec/rebuilderd
+  ansible.builtin.file:
+    path: /usr/libexec/rebuilderd
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: rebuilder-fedora.sh
+    dest: /usr/libexec/rebuilderd/rebuilder-fedora.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Enable and run rebuilderd-worker@repro1.service
+  ansible.builtin.systemd_service:
+    name: rebuilderd-worker@repro1.service
+    state: started
+    enabled: true
